@@ -1,0 +1,41 @@
+version: '3'
+services:
+  web:
+    image: php:apache
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./php:/var/www/html 
+    networks:
+      - lamp_backend    
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Sea101Foam
+      MYSQL_DATABASE: tasks
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - lamp_backend  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    ports:
+      - "8081:80"
+    links:  
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    networks:
+      - lamp_backend  
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+networks:
+  lamp_backend:       
