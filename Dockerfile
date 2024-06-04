@@ -2,7 +2,14 @@
 FROM php:apache
 
 # Enable the rewrite module
-RUN sed -i '/#LoadModule rewrite_module/s/^#//g' /usr/local/apache2/conf/httpd.conf
+RUN apt-get update
+RUN apt-get upgrade -y
 
-# Allow .htaccess overrides
-RUN sed -i '/<Directory "\/usr\/local\/apache2\/htdocs">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /usr/local/apache2/conf/httpd.conf
+RUN a2enmod rewrite
+RUN service apache2 restart
+
+COPY ./php /var/www/html
+
+WORKDIR /var/www/html
+
+EXPOSE 80
