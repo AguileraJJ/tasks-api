@@ -8,7 +8,7 @@ RUN apt-get upgrade -y
 RUN a2enmod rewrite
 RUN service apache2 restart
 
-COPY ./php /var/www/html
+COPY ./site /var/www/html
 
 WORKDIR /var/www/html
 
