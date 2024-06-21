@@ -7,7 +7,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./php:/var/www/html 
+      - ./site:/var/www/html
     networks:
       - lamp_backend    
   mysql:
