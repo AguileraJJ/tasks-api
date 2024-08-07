@@ -5,7 +5,10 @@ declare (strict_types=1);
 require dirname(__DIR__) . "/vendor/autoload.php";
 
 set_exception_handler("ErrorHandler::handleException");
-//echo $_SERVER["REQUEST_URI"];
+
+//$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+//$dotenv->load();
+
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
 $parts = explode("/", $path);
@@ -20,6 +23,10 @@ if ($resource != "tasks"){
 }
 
 header("Content-type: application/json; charset=UTF-8");
+
+$database = new Database("127.0.0.1", "tasks", "root", "Sea101Foam");
+
+$database->getConnection();
 
 $controller = new TaskController;
 
