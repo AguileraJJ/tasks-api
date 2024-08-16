@@ -29,6 +29,8 @@ $database = new Database($_ENV["DB_HOST"], $_ENV["DB_NAME"], $_ENV["DB_USER"], $
 
 $database->getConnection();
 
-$controller = new TaskController;
+$task_gateway = new TaskGateway($database);
+
+$controller = new TaskController($task_gateway);
 
 $controller->processRequest($_SERVER['REQUEST_METHOD'], $id);
