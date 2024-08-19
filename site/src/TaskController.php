@@ -15,7 +15,14 @@ class TaskController{
                 echo json_encode($this->gw->getAll());
 
             }elseif ($method == "POST"){
-                echo "create";
+                //echo "create";
+		        //print_r($_POST);
+		        $data = (array) json_decode(file_get_contents("php://input"), true);
+                //var_dump($data);    
+                $id = $this->gw->create($data);
+                $this->respondCreated($id);
+
+
             }else{
                 $this->respondMethodNotAllowed("GET, POST");
             }
@@ -57,6 +64,11 @@ class TaskController{
     private function responseNotFound(string $id) :void {
         http_response_code(404);
         echo json_encode(["message" => "Task with ID $id not found"]);
+    }
+
+    private function respondCreated(string $id) :void {
+        http_response_code(201);
+        echo json_encode(["message" => "Task Created", "id" => $id]);
     }
 
 }
