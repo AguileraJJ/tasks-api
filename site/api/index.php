@@ -23,6 +23,17 @@ if ($resource != "tasks"){
     exit;
 }
 
+if(empty($_SERVER["HTTP_X_API_KEY"])){
+    
+    http_response_code(400);
+    echo json_encode(["message" => "missing API Key"]);
+    exit;
+}
+
+$api_key = $_SERVER["HTTP_X_API_KEY"];
+echo $api_key;
+exit;
+
 header("Content-type: application/json; charset=UTF-8");
 
 //$database = new Database("mysql","tasks", "root", "Sea101Foam");
