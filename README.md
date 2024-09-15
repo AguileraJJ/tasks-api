@@ -23,7 +23,7 @@ DB_PASS = <password>
 ```
 
 The MySql DB is not part of a git ignore so pulling from this Repo will not sync or update to any other DB
-Insert into mysql DB:
+Insert into mysql DB to create the `task` table:
 
 ```sh
 CREATE TABLE task (
@@ -35,6 +35,22 @@ CREATE TABLE task (
     INDEX (name)
 );
  ```
+
+Insert into mysql DB to create the `user` table that will also hold API keys:
+
+```sh
+CREATE TABLE user (
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(128) NOT NULL,
+    username VARCHAR(128) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    api_key VARCHAR(32) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (username),
+    UNIQUE (api_key)
+);
+ ```
+
 
 ## API endpoints
 
