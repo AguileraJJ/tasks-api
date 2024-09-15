@@ -51,6 +51,26 @@ CREATE TABLE user (
 );
  ```
 
+Insert user_id field into task table when ready and add the foreign key with cascading:
+
+```sh
+ALTER TABLE `task` 
+ADD `user_id` INT 
+NOT NULL 
+AFTER `is_complete`, 
+ADD INDEX `user_id` (`user_id`);
+```
+
+```sh
+ALTER TABLE task
+ADD user_id INT NOT NULL,
+ADD INDEX (user_id);
+
+ALTER TABLE task
+ADD FOREIGN KEY (user_id) REFERENCES user(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
 
 ## API endpoints
 

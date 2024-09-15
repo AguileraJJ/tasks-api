@@ -3,16 +3,19 @@
 class TaskController{
 
     private TaskGateway $gw;
+    private int $user_id;
 
-    public function __construct($gateway) {
+    public function __construct($gateway, $uid) {
         $this->gw = $gateway;
+        $this->user_id = $uid;
     }
 
     public function processRequest(string $method, ?string $id): void{
         if($id === null){
             if ($method == "GET"){
-                //echo "index";
-                echo json_encode($this->gw->getAll());
+                echo json_encode(["message" => $this->user_id});
+		 //echo "index";
+               // echo json_encode($this->gw->getAllForUser($this->user_id));
 
             }elseif ($method == "POST"){
                 //echo "create";
@@ -25,7 +28,7 @@ class TaskController{
                     return;
                 }
                 
-                $id = $this->gw->create($data);
+                $id = $this->gw->createForUser($this->user_id, $data);
                 $this->respondCreated($id);
 
 
@@ -34,7 +37,7 @@ class TaskController{
             }
         }else{
 
-            $task = $this->gw->get($id);
+            $task = $this->gw->getForUser($this->user_id, $id);
 
             if($task === false) {
                 $this->responseNotFound($id);
@@ -57,13 +60,13 @@ class TaskController{
                     }
                     //echo "update $id";
                     
-                    $rows = $this->gw->update($id, $data);
+                    $rows = $this->gw->updateForUser($this->user_id, $id, $data);
                     echo json_encode(["message" => "Task Updated", "rows" => $rows]);
                     break;
 
                 case "DELETE":
                     //echo "delete $id";
-                    $rows = $this->gw->delete($id);
+                    $rows = $this->gw->deleteForUser($this->user_id, $id);
                     echo json_encode(["message" => "Task Deleted", "rows" => $rows]);
                     break;
 
