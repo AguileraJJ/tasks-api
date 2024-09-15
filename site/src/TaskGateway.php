@@ -95,8 +95,7 @@ class TaskGateway {
 
         $stmnt->bindValue(":is_complete", $data['is_complete'] ?? false, PDO::PARAM_BOOL);
 
-        $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_BOOL);
-
+        $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
 
         $stmnt->execute();
 
@@ -166,12 +165,12 @@ class TaskGateway {
 
             }, array_keys($field));
 
-            $sql = "UPDATE task SET " . implode(", " , $sets) . " WHERE id = :id";
+            $sql = "UPDATE task SET " . implode(", " , $sets) . " WHERE id = :id AND user_id = :user_id";
 
             $stmnt = $this->conn->prepare($sql);
 
             $stmnt->bindValue(":id", $id, PDO::PARAM_INT);
-	    $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);	
+	        $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);	
 
             foreach ($field as $name=>$value){
                 $stmnt->bindValue(":$name", $value[0], $value[1]);
@@ -189,7 +188,7 @@ class TaskGateway {
 
         $stmnt = $this->conn->prepare($sql);
         $stmnt->bindValue(":id", $id, PDO::PARAM_INT);
-	$stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
+     	$stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
 
         $stmnt->execute();
 

@@ -30,9 +30,6 @@ if ( ! $auth->authenticationAPIKey()){
 
 $user_id = $auth->getUserId();
 
-//var_dump($user_id);
-//exit;
-
 $task_gateway = new TaskGateway($database);
 
 $controller = new TaskController($task_gateway, $user_id);

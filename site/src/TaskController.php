@@ -13,9 +13,9 @@ class TaskController{
     public function processRequest(string $method, ?string $id): void{
         if($id === null){
             if ($method == "GET"){
-                echo json_encode(["message" => $this->user_id});
-		 //echo "index";
-               // echo json_encode($this->gw->getAllForUser($this->user_id));
+                //echo "index";
+                //echo json_encode(["message" => $this->user_id]);
+                echo json_encode($this->gw->getAllForUser($this->user_id));
 
             }elseif ($method == "POST"){
                 //echo "create";
@@ -29,6 +29,7 @@ class TaskController{
                 }
                 
                 $id = $this->gw->createForUser($this->user_id, $data);
+                //echo json_encode(["user id" => $id]);
                 $this->respondCreated($id);
 
 
