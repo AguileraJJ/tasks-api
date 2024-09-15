@@ -4,6 +4,7 @@ declare (strict_types=1);
 
 require dirname(__DIR__) . "/vendor/autoload.php";
 
+set_error_handler("ErrorHandler::handleError");
 set_exception_handler("ErrorHandler::handleException");
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
@@ -22,6 +23,17 @@ if ($resource != "tasks"){
     exit;
 }
 
+if(empty($_SERVER["HTTP_X_API_KEY"])){
+    
+    http_response_code(400);
+    echo json_encode(["message" => "missing API Key"]);
+    exit;
+}
+
+$api_key = $_SERVER["HTTP_X_API_KEY"];
+echo $api_key;
+exit;
+
 header("Content-type: application/json; charset=UTF-8");
 
 //$database = new Database("mysql","tasks", "root", "Sea101Foam");
@@ -29,6 +41,8 @@ $database = new Database($_ENV["DB_HOST"], $_ENV["DB_NAME"], $_ENV["DB_USER"], $
 
 $database->getConnection();
 
-$controller = new TaskController;
+$task_gateway = new TaskGateway($database);
+
+$controller = new TaskController($task_gateway);
 
 $controller->processRequest($_SERVER['REQUEST_METHOD'], $id);
