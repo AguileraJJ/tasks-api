@@ -20,4 +20,17 @@ class UserGateway{
         return $stmt->fetch(PDO::FETCH_ASSOC);
 
     }
+
+    public function getByUsername(string $username): array | false {
+
+        $sql = "SELECT * FROM user WHERE username = :username";
+
+        $stmnt = $this->conn->prepare($sql);
+        $stmnt->bindValue(":username", $username, PDO::PARAM_STR);
+
+        $stmnt->execute();
+
+        return $stmnt->fetch(PDO::FETCH_ASSOC);
+
+    }
 }
