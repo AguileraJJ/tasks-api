@@ -2,6 +2,12 @@
 
 class JWTCodec {
 
+    private string $key;
+
+    public function __construct(string $key){
+        $this->key = $key;
+    }
+
     public function encode(array $payload): string {
         
         $header = json_encode([
@@ -15,7 +21,7 @@ class JWTCodec {
 
         $signature = hash_hmac("sha256", 
                                 $header . "." . $payload,
-                                "XaGKjbTSbPl2tXKH4a4EEPmuxvRvvRJ/xComHiOZTZcegBkZZewP7HplzrhYs7YPUKOL3Dl02+LMKNY0TAdGGreMsE0AkQAFChdGoTg53x3LfJEraZPR4t2b1ASM4CcLXvUKlXgW8NQCLlHPhVAuOo4TUjG5qhgnnqmrVkrjZH6Ns1d+q5G4qbtTEKz2JMqLfryN0/z2/NMAJ7X3w6yKnIkb1/Xs4idRm8uG9Dl1Ka8O/VT9cpnGp0yDyCftr5xd4jLrbCEamWqU9KThVaBxfpvhDD2kIwM2O/gpsBp8sMy3o92yosJ2eeILYdCiadQ7DXiy7y4G05TXZpOZ57It9qzhmxAA4GfllMDqSo10L6g=",
+                                $this->key,
                                 true);
 
         $signature = $this->base64urlEncode($signature);
@@ -24,11 +30,43 @@ class JWTCodec {
 
     }
 
+    public function decode(string $token): array {
+        if (preg_match("/^(?<header>.+)\.(?<payload>.+)\.(?<signature>.+)$/",
+        $token, 
+        $matches) !== 1){
+            throw new InvalidArgumentException("invalid token format");
+        }
+
+        $signature = hash_hmac("sha256", 
+                                $matches["header"] . "." . $matches["payload"],
+                                $this->key,
+                                true);
+
+        $signature_from_token = $this->base64urlDecode($matches["signature"]);
+
+        if (! hash_equals($signature, $signature_from_token)){
+            throw new Exception("signature doesn't match");
+        }
+
+        $payload = json_decode($this->base64urlDecode($matches["payload"]), true);
+
+        return $payload;
+    }
+
     private function base64urlEncode(string $text): string {
 
         return str_replace(
             ["+" , "/" , "="], 
             ["-", "_", ""], 
             base64_encode($text));
+    }
+
+    private function base64urlDecode(string $text):string {
+        
+        return base64_decode(str_replace(
+            ["-" , "_"], 
+            ["+", "/"], 
+            $text)
+        );
     }
 }

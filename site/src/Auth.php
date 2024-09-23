@@ -2,6 +2,7 @@
 
 class Auth{
 
+    private JWTCodec $JWT;
     private UserGateway $user_gateway;
     private int $user_id;
 
@@ -44,6 +45,10 @@ class Auth{
             return false;
         }
 
+        /*
+         * Can Remove this code as the Authentication is 
+         * by JWT
+         *
         $plain_text = base64_decode($matches[1], true);
 
         if ($plain_text === false) {
@@ -59,6 +64,7 @@ class Auth{
             echo json_encode(["message" => "invalid JSON"]);
             return false;
         }
+        */
 
         $this->user_id = $data['id'];
 
