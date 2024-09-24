@@ -2,12 +2,15 @@
 
 class Auth{
 
-    private JWTCodec $JWT;
+    private JWTCodec $codec;
+    
     private UserGateway $user_gateway;
+    
     private int $user_id;
 
-    public function __construct($user_gateway) {
+    public function __construct($user_gateway, $codec) {
         $this->user_gateway = $user_gateway;
+        $this->codec = $codec;    
     }
 
     public function authenticationAPIKey() : bool {
@@ -66,7 +69,15 @@ class Auth{
         }
         */
 
-        $this->user_id = $data['id'];
+        try{
+            $data = $this->codec->decode($matches[1]);
+        } catch (Exception $e){
+            http_response_code(400);
+            echo json_encode(["message" => $e->getMessage()]);
+            return false;
+        }
+        
+        $this->user_id = $data['sub'];
 
         return true;
     }
