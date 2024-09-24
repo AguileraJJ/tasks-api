@@ -20,6 +20,8 @@ DB_HOST = <mysql_hostname>
 DB_NAME = <database_name>
 DB_USER = <username>
 DB_PASS = <password>
+
+SECRET_KEY = "generate 256 key from any site"
 ```
 
 The MySql DB is not part of a git ignore so pulling from this Repo will not sync or update to any other DB

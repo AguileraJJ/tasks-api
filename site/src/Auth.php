@@ -71,7 +71,21 @@ class Auth{
 
         try{
             $data = $this->codec->decode($matches[1]);
+
+        } catch (TokenExpiredException) {
+
+            http_response_code(401);
+            echo json_encode(["message" => "token expired"]);
+            return false;
+
+        } catch (InvalidSignatureException) {
+            
+            http_response_code(401);
+            echo json_encode(["message" => "invalid signature"]);
+            return false;
+
         } catch (Exception $e){
+            
             http_response_code(400);
             echo json_encode(["message" => $e->getMessage()]);
             return false;
