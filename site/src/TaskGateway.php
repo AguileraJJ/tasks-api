@@ -8,17 +8,22 @@ class TaskGateway {
         $this->conn = $database->getConnection();
     }
 
-    public function getAll() :array {
+    public function getAllForUser(int $user_id) :array {
 
-        $sql = "SELECT * FROM task ORDER BY name";
+        $sql = "SELECT * FROM task WHERE user_id = :user_id ORDER BY name";
 
-        $stmnt = $this->conn->query($sql); //Retruns PDO
+        //$stmnt = $this->conn->query($sql); //Retruns PDO
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
+
+        $stmt->execute();
 
         //return $stmnt->fetchAll(PDO::FETCH_ASSOC);
 
         $data = [];
 
-        while ($row = $stmnt->fetch(PDO::FETCH_ASSOC)){
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
             $row['is_complete'] = (bool) $row['is_complete'];
             $data[] = $row;
         }
@@ -26,13 +31,14 @@ class TaskGateway {
         return $data;
     }
 
-    public function get(string $id) : array|false{
+    public function getForUser(int $user_id, string $id) : array|false{
 
-        $sql = "SELECT * FROM task WHERE id = :id";
+        $sql = "SELECT * FROM task WHERE id = :id AND user_id = :user_id";
 
         $stmnt = $this->conn->prepare($sql);
 
         $stmnt->bindValue(":id", $id, PDO::PARAM_INT);
+        $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
 
         $stmnt->execute();
 
@@ -68,6 +74,32 @@ class TaskGateway {
         $stmnt->execute();
 
         //Return the ID of the task created lastInsertID() method 
+        return $this->conn->lastInsertID();
+    }
+
+
+    public function createForUser(int $user_id, array $data) : string{
+
+        $sql = "INSERT INTO task (name, priority, is_complete, user_id)
+                    VALUES (:name, :priority, :is_complete, :user_id)";
+
+        $stmnt = $this->conn->prepare($sql);
+
+        $stmnt->bindValue(":name", $data['name'], PDO::PARAM_STR);
+
+        if(empty($data['priority'])){
+            $stmnt->bindValue(":priority", null, PDO::PARAM_NULL);
+        }else{
+            $stmnt->bindValue(":priority", $data['priority'], PDO::PARAM_INT);
+        }
+
+        $stmnt->bindValue(":is_complete", $data['is_complete'] ?? false, PDO::PARAM_BOOL);
+
+        $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
+
+        $stmnt->execute();
+
+        //Return the ID of the task created lastInsertID() method
         return $this->conn->lastInsertID();
     }
 
@@ -110,12 +142,53 @@ class TaskGateway {
         }
     }
 
-    public function delete(string $id) : int{
+    public function updateForUser(int $user_id, string $id, array $data) : int {
+        $field = [];
 
-        $sql = "DELETE FROM task WHERE id = :id";
+        if(!empty($data['name'])) {
+            $field["name"] = [$data["name"], PDO::PARAM_STR];
+        }
+        if(array_key_exists("priority", $data)) {
+            $field["priority"] = [$data["priority"], $data["priority"] === null? PDO::PARAM_NULL : PDO::PARAM_INT];
+        }
+        if(array_key_exists("is_complete", $data)) {
+            $field["is_complete"] = [$data["is_complete"], PDO::PARAM_BOOL];
+        }
+
+        if(empty($field)){
+            return 0;
+        }else{
+
+            $sets = array_map(function($value) {
+
+                return "$value = :$value";
+
+            }, array_keys($field));
+
+            $sql = "UPDATE task SET " . implode(", " , $sets) . " WHERE id = :id AND user_id = :user_id";
+
+            $stmnt = $this->conn->prepare($sql);
+
+            $stmnt->bindValue(":id", $id, PDO::PARAM_INT);
+	        $stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);	
+
+            foreach ($field as $name=>$value){
+                $stmnt->bindValue(":$name", $value[0], $value[1]);
+            }
+
+            $stmnt->execute();
+
+            return $stmnt->rowCount();
+        }
+    }
+
+    public function deleteForUser(int $user_id, string $id) : int{
+
+        $sql = "DELETE FROM task WHERE id = :id AND user_id = :user_id";
 
         $stmnt = $this->conn->prepare($sql);
         $stmnt->bindValue(":id", $id, PDO::PARAM_INT);
+     	$stmnt->bindValue(":user_id", $user_id, PDO::PARAM_INT);
 
         $stmnt->execute();
 

@@ -20,6 +20,8 @@ DB_HOST = <mysql_hostname>
 DB_NAME = <database_name>
 DB_USER = <username>
 DB_PASS = <password>
+
+SECRET_KEY = "generate 256 key from any site"
 ```
 
 The MySql DB is not part of a git ignore so pulling from this Repo will not sync or update to any other DB
@@ -50,6 +52,26 @@ CREATE TABLE user (
     UNIQUE (api_key)
 );
  ```
+
+Insert user_id field into task table when ready and add the foreign key with cascading:
+
+```sh
+ALTER TABLE `task` 
+ADD `user_id` INT 
+NOT NULL 
+AFTER `is_complete`, 
+ADD INDEX `user_id` (`user_id`);
+```
+
+```sh
+ALTER TABLE task
+ADD user_id INT NOT NULL,
+ADD INDEX (user_id);
+
+ALTER TABLE task
+ADD FOREIGN KEY (user_id) REFERENCES user(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
+```
 
 
 ## API endpoints

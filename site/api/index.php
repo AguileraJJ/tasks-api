@@ -2,13 +2,7 @@
 
 declare (strict_types=1);
 
-require dirname(__DIR__) . "/vendor/autoload.php";
-
-set_error_handler("ErrorHandler::handleError");
-set_exception_handler("ErrorHandler::handleException");
-
-$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
+require __DIR__ . "/bootstrap.php";
 
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
@@ -23,26 +17,23 @@ if ($resource != "tasks"){
     exit;
 }
 
-if(empty($_SERVER["HTTP_X_API_KEY"])){
-    
-    http_response_code(400);
-    echo json_encode(["message" => "missing API Key"]);
+
+$database = new Database($_ENV["DB_HOST"], $_ENV["DB_NAME"], $_ENV["DB_USER"], $_ENV["DB_PASS"]);
+
+$user_gateway = new UserGateway($database);
+
+$codec = new JWTCodec($_ENV["SECRET_KEY"]);
+
+$auth = new Auth($user_gateway, $codec);
+
+if ( ! $auth->authenticateAccessToken()){
     exit;
 }
 
-$api_key = $_SERVER["HTTP_X_API_KEY"];
-echo $api_key;
-exit;
-
-header("Content-type: application/json; charset=UTF-8");
-
-//$database = new Database("mysql","tasks", "root", "Sea101Foam");
-$database = new Database($_ENV["DB_HOST"], $_ENV["DB_NAME"], $_ENV["DB_USER"], $_ENV["DB_PASS"]);
-
-$database->getConnection();
+$user_id = $auth->getUserId();
 
 $task_gateway = new TaskGateway($database);
 
-$controller = new TaskController($task_gateway);
+$controller = new TaskController($task_gateway, $user_id);
 
 $controller->processRequest($_SERVER['REQUEST_METHOD'], $id);
